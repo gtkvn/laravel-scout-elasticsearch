@@ -162,9 +162,15 @@ class ElasticsearchEngine extends Engine
             'type' => $builder->index ?: $builder->model->searchableAs(),
             'body' => [
                 'query' => [
-                    'query_string' => [
-                        'query' => "{$builder->query}",
-                    ],
+                    'bool' => [
+                        'must' => [
+                            [
+                                'query_string' => [
+                                    'query' => "{$builder->query}",
+                                ],
+                            ],
+                        ]
+                    ]
                 ],
             ],
         ];
