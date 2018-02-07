@@ -1,0 +1,39 @@
+{
+    "name": "gtk/laravel-scout-elasticsearch",
+    "description": "Elasticsearch driver for Laravel Scout",
+    "keywords": ["laravel", "scout", "elasticsearch"],
+    "license": "MIT",
+    "support": {
+        "issues": "https://github.com/gtkvn/laravel-scout-elasticsearch/issues",
+        "source": "https://github.com/gtkvn/laravel-scout-elasticsearch"
+    },
+    "authors": [
+        {
+            "name": "Giang Thai Cuong",
+            "email": "thaicuong.giang@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.6.4",
+        "laravel/scout": "^3.0",
+        "elasticsearch/elasticsearch": "^6.0"
+    },
+    "require-dev": {
+        "mockery/mockery": "~0.9",
+        "phpunit/phpunit": "~5.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Gtk\\LaravelScoutElasticsearch\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Gtk\\LaravelScoutElasticsearch\\ServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
