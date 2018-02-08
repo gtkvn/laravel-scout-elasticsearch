@@ -249,7 +249,7 @@ class ElasticsearchEngine extends Engine
         $keys = $this->mapIds($results);
 
         $models = $model->whereIn(
-            $model->getKeyName(),
+            $model->getQualifiedKeyName(),
             $keys
         )->get()->keyBy($model->getKeyName());
 
