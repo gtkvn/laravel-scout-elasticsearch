@@ -161,17 +161,7 @@ class ElasticsearchEngine extends Engine
             'index' => $this->index,
             'type' => $builder->index ?: $builder->model->searchableAs(),
             'body' => [
-                'query' => [
-                    'bool' => [
-                        'must' => [
-                            [
-                                'query_string' => [
-                                    'query' => "{$builder->query}",
-                                ],
-                            ],
-                        ]
-                    ]
-                ],
+                'query' => $this->buildRawQuery($builder, $options),
             ],
         ];
 
@@ -181,13 +171,6 @@ class ElasticsearchEngine extends Engine
 
         if (isset($options['size'])) {
             $params['body']['size'] = $options['size'];
-        }
-
-        if (isset($options['numericFilters']) && count($options['numericFilters'])) {
-            $params['body']['query']['bool']['must'] = array_merge(
-                $params['body']['query']['bool']['must'],
-                $options['numericFilters']
-            );
         }
 
         if ($builder->callback) {
@@ -200,6 +183,41 @@ class ElasticsearchEngine extends Engine
         }
 
         return $this->elastic->search($params);
+    }
+
+    /**
+     * Buidl Elasticsearch query.
+     *
+     * @param  \Laravel\Scout\Builder  $builder
+     * @param  array  $options
+     * @return array
+     */
+    protected function buildRawQuery(Builder $builder, array $options = [])
+    {
+        if (is_array($builder->query)) {
+            return $builder->query;
+        }
+
+        $query = [
+            'bool' => [
+                'must' => [
+                    [
+                        'query_string' => [
+                            'query' => "{$builder->query}",
+                        ],
+                    ],
+                ]
+            ]
+        ];
+
+        if (isset($options['numericFilters']) && count($options['numericFilters'])) {
+            $query['bool']['must'] = array_merge(
+                $query['bool']['must'],
+                $options['numericFilters']
+            );
+        }
+
+        return $query;
     }
 
     /**
