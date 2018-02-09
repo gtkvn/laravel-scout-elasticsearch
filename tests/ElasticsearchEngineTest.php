@@ -18,7 +18,7 @@ class ElasticsearchEngineTest extends AbstractTestCase
             'body' => [
                 [
                     'index' => [
-                        '_index' => 'index_name',
+                        '_index' => 'table',
                         '_type' => 'table',
                         '_id' => 1,
                     ],
@@ -29,7 +29,7 @@ class ElasticsearchEngineTest extends AbstractTestCase
             ],
         ]);
 
-        $engine = new ElasticsearchEngine($client, 'index_name');
+        $engine = new ElasticsearchEngine($client, 'table');
 
         $engine->update(Collection::make([new ElasticsearchEngineTestModel]));
     }
@@ -42,7 +42,7 @@ class ElasticsearchEngineTest extends AbstractTestCase
             'body' => [
                 [
                     'delete' => [
-                        '_index' => 'index_name',
+                        '_index' => 'table',
                         '_type' => 'table',
                         '_id' => 1,
                     ],
@@ -50,7 +50,7 @@ class ElasticsearchEngineTest extends AbstractTestCase
             ],
         ]);
 
-        $engine = new ElasticsearchEngine($client, 'index_name');
+        $engine = new ElasticsearchEngine($client, 'table');
 
         $engine->delete(Collection::make([new ElasticsearchEngineTestModel]));
     }
@@ -101,51 +101,51 @@ class ElasticsearchEngineTest extends AbstractTestCase
         $this->assertEquals(1, count($results));
     }
 
-    public function test_real_elasticsearch_update_and_search()
-    {
-        $engine = $this->getRealElasticsearchEngine();
+    // public function test_real_elasticsearch_update_and_search()
+    // {
+    //     $engine = $this->getRealElasticsearchEngine();
 
-        $engine->update(Collection::make([new ElasticsearchEngineTestModel]));
+    //     $engine->update(Collection::make([new ElasticsearchEngineTestModel]));
 
-        $builder = new Builder(new ElasticsearchEngineTestModel, '1');
+    //     $builder = new Builder(new ElasticsearchEngineTestModel, '1');
 
-        $builder->where('id', 1);
+    //     $builder->where('id', 1);
 
-        $results = $engine->search($builder);
+    //     $results = $engine->search($builder);
 
-        $this->assertEquals(1, $results['hits']['total']);
+    //     $this->assertEquals(1, $results['hits']['total']);
 
-        $this->assertEquals('1', $results['hits']['hits'][0]['_id']);
+    //     $this->assertEquals('1', $results['hits']['hits'][0]['_id']);
 
-        $this->assertEquals(['id' => 1], $results['hits']['hits'][0]['_source']);
+    //     $this->assertEquals(['id' => 1], $results['hits']['hits'][0]['_source']);
 
-        $builder->where('title', 'zonda');
+    //     $builder->where('title', 'zonda');
 
-        $results = $engine->search($builder);
+    //     $results = $engine->search($builder);
 
-        $this->assertEquals(0, $results['hits']['total']);
-    }
+    //     $this->assertEquals(0, $results['hits']['total']);
+    // }
 
-    public function test_real_elasticsearch_delete()
-    {
-        $engine = $this->getRealElasticsearchEngine();
+    // public function test_real_elasticsearch_delete()
+    // {
+    //     $engine = $this->getRealElasticsearchEngine();
 
-        $collection = Collection::make([new ElasticsearchEngineTestModel]);
+    //     $collection = Collection::make([new ElasticsearchEngineTestModel]);
 
-        $engine->update($collection);
+    //     $engine->update($collection);
 
-        $builder = new Builder(new ElasticsearchEngineTestModel, '1');
+    //     $builder = new Builder(new ElasticsearchEngineTestModel, '1');
 
-        $engine->delete($collection);
+    //     $engine->delete($collection);
 
-        $builder = new Builder(new ElasticsearchEngineTestModel, '1');
+    //     $builder = new Builder(new ElasticsearchEngineTestModel, '1');
 
-        $results = $engine->search($builder);
+    //     $results = $engine->search($builder);
 
-        $this->assertEquals($results['hits']['total'], 0);
-    }
+    //     $this->assertEquals($results['hits']['total'], 0);
+    // }
 
-    protected function getRealElasticsearchEngine($index = 'index_name')
+    protected function getRealElasticsearchEngine()
     {
         $client = $this->getRealElasticsearchClient();
 
@@ -153,6 +153,6 @@ class ElasticsearchEngineTest extends AbstractTestCase
 
         $this->resetIndex($client);
 
-        return new ElasticsearchEngine($client, $index);
+        return new ElasticsearchEngine($client);
     }
 }

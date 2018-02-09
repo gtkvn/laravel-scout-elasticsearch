@@ -15,12 +15,6 @@ class ElasticsearchEngine extends Engine
      * @var \Elasticsearch\Client
      */
     protected $elastic;
-    /**
-     * The Elasticsearch index.
-     *
-     * @var string
-     */
-    protected $index;
 
     /**
      * Create a new engine instance.
@@ -28,11 +22,9 @@ class ElasticsearchEngine extends Engine
      * @param  \Elasticsearch\Client  $elastic
      * @return void
      */
-    public function __construct(Elastic $elastic, $index)
+    public function __construct(Elastic $elastic)
     {
         $this->elastic = $elastic;
-
-        $this->index = $index;
     }
 
     /**
@@ -54,7 +46,7 @@ class ElasticsearchEngine extends Engine
         $models->each(function ($model) use (&$params, &$i) {
             $params['body'][] = [
                 'index' => [
-                    '_index' => $this->index,
+                    '_index' => $model->searchableAs(),
                     '_type' => $model->searchableAs(),
                     '_id' => $model->getKey(),
                 ]
@@ -94,7 +86,7 @@ class ElasticsearchEngine extends Engine
         $models->each(function ($model) use (&$params, &$i) {
             $params['body'][] = [
                 'delete' => [
-                    '_index' => $this->index,
+                    '_index' => $model->searchableAs(),
                     '_type' => $model->searchableAs(),
                     '_id' => $model->getKey(),
                 ]
@@ -158,7 +150,7 @@ class ElasticsearchEngine extends Engine
     protected function performSearch(Builder $builder, array $options = [])
     {
         $params = [
-            'index' => $this->index,
+            'index' => $builder->model->searchableAs(),
             'type' => $builder->index ?: $builder->model->searchableAs(),
             'body' => [
                 'query' => $this->buildRawQuery($builder, $options),
