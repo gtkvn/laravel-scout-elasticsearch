@@ -29,7 +29,7 @@ class ElasticsearchEngineTest extends AbstractTestCase
             ],
         ]);
 
-        $engine = new ElasticsearchEngine($client, 'table');
+        $engine = new ElasticsearchEngine($client);
 
         $engine->update(Collection::make([new ElasticsearchEngineTestModel]));
     }
@@ -50,18 +50,18 @@ class ElasticsearchEngineTest extends AbstractTestCase
             ],
         ]);
 
-        $engine = new ElasticsearchEngine($client, 'table');
+        $engine = new ElasticsearchEngine($client);
 
         $engine->delete(Collection::make([new ElasticsearchEngineTestModel]));
     }
 
-    public function test_search_sends_correct_parameters_to_elastic()
+    public function test_search_sends_correct_parameters_to_elasticsearch()
     {
         $client = Mockery::mock('Elasticsearch\Client');
 
         $client->shouldReceive('search');
 
-        $engine = new ElasticsearchEngine($client, 'my_index');
+        $engine = new ElasticsearchEngine($client);
 
         $builder = new Builder(new ElasticsearchEngineTestModel, 'zonda');
 
@@ -74,9 +74,11 @@ class ElasticsearchEngineTest extends AbstractTestCase
     {
         $client = Mockery::mock('Elasticsearch\Client');
 
-        $engine = new ElasticsearchEngine($client, 'my_index');
+        $engine = new ElasticsearchEngine($client);
 
         $model = Mockery::mock('StdClass');
+
+        $model->shouldReceive('newQuery')->andReturn($model);
 
         $model->shouldReceive('getKeyName')->andReturn('id');
 

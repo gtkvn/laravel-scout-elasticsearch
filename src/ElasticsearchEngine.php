@@ -6,6 +6,7 @@ use Laravel\Scout\Builder;
 use Laravel\Scout\Engines\Engine;
 use Elasticsearch\Client as Elastic;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ElasticsearchEngine extends Engine
 {
@@ -39,20 +40,34 @@ class ElasticsearchEngine extends Engine
             return;
         }
 
+        $index = $models->first()->searchableAs();
+
+        if ($this->usesSoftDelete($models->first()) && config('scout.soft_delete', false)) {
+            $models->each->pushSoftDeleteMetadata();
+        }
+
         $params = ['body' => []];
 
         $i = 0;
 
-        $models->each(function ($model) use (&$params, &$i) {
+        $models->each(function ($model) use ($index, &$params, &$i) {
+            $array = array_merge(
+                $model->toSearchableArray(), $model->scoutMetadata()
+            );
+
+            if (empty($array)) {
+                return;
+            }
+
             $params['body'][] = [
                 'index' => [
-                    '_index' => $model->searchableAs(),
-                    '_type' => $model->searchableAs(),
+                    '_index' => $index,
+                    '_type' => $index,
                     '_id' => $model->getKey(),
                 ]
             ];
 
-            $params['body'][] = $model->toSearchableArray();
+            $params['body'][] = $array;
 
             ++$i;
 
@@ -79,15 +94,17 @@ class ElasticsearchEngine extends Engine
      */
     public function delete($models)
     {
+        $index = $models->first()->searchableAs();
+
         $params = ['body' => []];
 
         $i = 0;
 
-        $models->each(function ($model) use (&$params, &$i) {
+        $models->each(function ($model) use ($index, &$params, &$i) {
             $params['body'][] = [
                 'delete' => [
-                    '_index' => $model->searchableAs(),
-                    '_type' => $model->searchableAs(),
+                    '_index' => $index,
+                    '_type' => $index,
                     '_id' => $model->getKey(),
                 ]
             ];
@@ -221,11 +238,9 @@ class ElasticsearchEngine extends Engine
     protected function filters(Builder $builder)
     {
         return collect($builder->wheres)->map(function ($value, $key) {
-            if (is_array($value)) {
-                return ['terms' => [$key => $value]];
-            }
-
-            return ['match' => [$key => $value]];
+            return is_array($value) ?
+                    ['terms' => [$key => $value]] :
+                    ['match' => [$key => $value]];
         })->values()->all();
     }
 
@@ -237,10 +252,7 @@ class ElasticsearchEngine extends Engine
      */
     public function mapIds($results)
     {
-        return collect($results['hits']['hits'])
-            ->pluck('_id')
-            ->values()
-            ->all();
+        return collect($results['hits']['hits'])->pluck('_id')->values();
     }
 
     /**
@@ -256,15 +268,20 @@ class ElasticsearchEngine extends Engine
             return Collection::make();
         }
 
-        $keys = $this->mapIds($results);
+        $builder = in_array(SoftDeletes::class, class_uses_recursive($model))
+                    ? $model->withTrashed() : $model->newQuery();
 
-        $models = $model->whereIn(
+        $models = $builder->whereIn(
             $model->getQualifiedKeyName(),
-            $keys
+            collect($results['hits']['hits'])->pluck('_id')->values()->all()
         )->get()->keyBy($model->getKeyName());
 
-        return collect($results['hits']['hits'])->map(function ($hit) use ($model, $models) {
-            return isset($models[$hit['_id']]) ? $models[$hit['_id']] : null;
+        return Collection::make($results['hits']['hits'])->map(function ($hit) use ($models) {
+            $key = $hit['_id'];
+
+            if (isset($models[$key])) {
+                return $models[$key];
+            }
         })->filter()->values();
     }
 
@@ -277,5 +294,16 @@ class ElasticsearchEngine extends Engine
     public function getTotalCount($results)
     {
         return $results['hits']['total'];
+    }
+
+    /**
+     * Determine if the given model uses soft deletes.
+     *
+     * @param  \Illuminate\Database\Eloquent\Model  $model
+     * @return bool
+     */
+    protected function usesSoftDelete($model)
+    {
+        return in_array(SoftDeletes::class, class_uses_recursive($model));
     }
 }

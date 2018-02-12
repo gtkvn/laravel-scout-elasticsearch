@@ -27,7 +27,7 @@ abstract class AbstractTestCase extends PHPUnit_Framework_TestCase
 
     protected function resetIndex(Elastic $client)
     {
-        $data = ['index' => 'index_name'];
+        $data = ['index' => 'table'];
 
         if ($client->indices()->exists($data)) {
             $client->indices()->delete($data);
