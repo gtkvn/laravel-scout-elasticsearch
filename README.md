@@ -18,11 +18,13 @@ When using the Elasticsearch driver, you should configure your Elasticsearch `ho
 
 ## Usage
 
+Default usage can be found on the [Laravel Scout documentation](https://laravel.com/docs/scout).
+
 You may begin searching a model using the `search` method. The search method accepts a single string that will be used to search your models. You should then chain the `get` method onto the search query to retrieve the Eloquent models that match the given search query:
 
     $orders = App\Order::search('Star Trek')->get();
     
-The `search` method also accepts an Elasticsearch raw query that will be used to perform an advanced search. Check [Elastic document](https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/_search_operations.html) for more information.
+In addition, the `search` method accepts an array that will be used as an Elasticsearch raw query to perform an advanced search:
 
     $orders = App\Order::search([
         'query' => [
@@ -31,7 +33,9 @@ The `search` method also accepts an Elasticsearch raw query that will be used to
             ],
         ],
     ])->get();
-    
+
+You can check [Elastic document](https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/_search_operations.html) for more information.
+
 ## License
 
 Laravel Scout Elasticsearch is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
