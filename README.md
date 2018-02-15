@@ -22,7 +22,7 @@ You may begin searching a model using the `search` method. The search method acc
 
     $orders = App\Order::search('Star Trek')->get();
     
-The `search` method also accepts an Elasticsearch raw query that will be used to perform an advanced search. Check Elastic document for more information.
+The `search` method also accepts an Elasticsearch raw query that will be used to perform an advanced search. Check [Elastic document](https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/_search_operations.html) for more information.
 
     $orders = App\Order::search([
         'query' => [
