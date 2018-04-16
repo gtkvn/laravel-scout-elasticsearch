@@ -19,7 +19,8 @@ class ServiceProvider extends BaseServiceProvider
             return new ElasticsearchEngine(
                 ClientBuilder::create()
                     ->setHosts(config('scout.elasticsearch.hosts'))
-                    ->build()
+                    ->build(),
+                config('scout.elasticsearch.index')
             );
         });
     }
