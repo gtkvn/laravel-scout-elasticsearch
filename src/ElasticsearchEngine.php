@@ -73,12 +73,12 @@ class ElasticsearchEngine extends Engine
                     '_index' => $this->index,
                     '_type' => $type,
                     '_id' => $model->getKey(),
-                ]
+                ],
             ];
 
             $params['body'][] = $array;
 
-            ++$i;
+            $i++;
 
             // Every 1000 documents stop and send the bulk request
             if ($i % 1000 == 0) {
@@ -115,10 +115,10 @@ class ElasticsearchEngine extends Engine
                     '_index' => $this->index,
                     '_type' => $type,
                     '_id' => $model->getKey(),
-                ]
+                ],
             ];
 
-            ++$i;
+            $i++;
 
             // Every 1000 documents stop and send the bulk request
             if ($i % 1000 == 0) {
@@ -224,8 +224,8 @@ class ElasticsearchEngine extends Engine
                             'query' => "{$builder->query}",
                         ],
                     ],
-                ]
-            ]
+                ],
+            ],
         ];
 
         if (isset($options['numericFilters']) && count($options['numericFilters'])) {
