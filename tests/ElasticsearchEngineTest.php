@@ -18,8 +18,8 @@ class ElasticsearchEngineTest extends AbstractTestCase
             'body' => [
                 [
                     'index' => [
-                        '_index' => 'index',
-                        '_type' => 'table',
+                        '_index' => 'table',
+                        '_type' => '_doc',
                         '_id' => 1,
                     ],
                 ],
@@ -29,7 +29,7 @@ class ElasticsearchEngineTest extends AbstractTestCase
             ],
         ]);
 
-        $engine = new ElasticsearchEngine($client, 'index');
+        $engine = new ElasticsearchEngine($client);
 
         $engine->update(Collection::make([new ElasticsearchEngineTestModel]));
     }
@@ -42,15 +42,15 @@ class ElasticsearchEngineTest extends AbstractTestCase
             'body' => [
                 [
                     'delete' => [
-                        '_index' => 'index',
-                        '_type' => 'table',
+                        '_index' => 'table',
+                        '_type' => '_doc',
                         '_id' => 1,
                     ],
                 ],
             ],
         ]);
 
-        $engine = new ElasticsearchEngine($client, 'index');
+        $engine = new ElasticsearchEngine($client);
 
         $engine->delete(Collection::make([new ElasticsearchEngineTestModel]));
     }
@@ -61,7 +61,7 @@ class ElasticsearchEngineTest extends AbstractTestCase
 
         $client->shouldReceive('search');
 
-        $engine = new ElasticsearchEngine($client, 'index');
+        $engine = new ElasticsearchEngine($client);
 
         $builder = new Builder(new ElasticsearchEngineTestModel, 'zonda');
 
@@ -74,7 +74,7 @@ class ElasticsearchEngineTest extends AbstractTestCase
     {
         $client = Mockery::mock('Elasticsearch\Client');
 
-        $engine = new ElasticsearchEngine($client, 'index');
+        $engine = new ElasticsearchEngine($client);
 
         $model = Mockery::mock('StdClass');
 

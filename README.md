@@ -23,7 +23,7 @@ Default usage can be found on the [Laravel Scout documentation](https://laravel.
 You may begin searching a model using the `search` method. The search method accepts a single string that will be used to search your models. You should then chain the `get` method onto the search query to retrieve the Eloquent models that match the given search query:
 
     $orders = App\Order::search('Star Trek')->get();
-    
+
 In addition, the `search` method accepts an array that will be used as an Elasticsearch raw query to perform an advanced search:
 
     $orders = App\Order::search([

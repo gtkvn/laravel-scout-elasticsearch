@@ -18,23 +18,15 @@ class ElasticsearchEngine extends Engine
     protected $elastic;
 
     /**
-     * The Elasticsearch index.
-     *
-     * @var string
-     */
-    protected $index;
-
-    /**
      * Create a new engine instance.
      *
      * @param  \Elasticsearch\Client  $elastic
      * @param  $index
      * @return void
      */
-    public function __construct(Elastic $elastic, $index)
+    public function __construct(Elastic $elastic)
     {
         $this->elastic = $elastic;
-        $this->index = $index;
     }
 
     /**
@@ -49,7 +41,7 @@ class ElasticsearchEngine extends Engine
             return;
         }
 
-        $type = $models->first()->searchableAs();
+        $index = $models->first()->searchableAs();
 
         if ($this->usesSoftDelete($models->first()) && config('scout.soft_delete', false)) {
             $models->each->pushSoftDeleteMetadata();
@@ -59,7 +51,7 @@ class ElasticsearchEngine extends Engine
 
         $i = 0;
 
-        $models->each(function ($model) use ($type, &$params, &$i) {
+        $models->each(function ($model) use ($index, &$params, &$i) {
             $array = array_merge(
                 $model->toSearchableArray(), $model->scoutMetadata()
             );
@@ -70,8 +62,8 @@ class ElasticsearchEngine extends Engine
 
             $params['body'][] = [
                 'index' => [
-                    '_index' => $this->index,
-                    '_type' => $type,
+                    '_index' => $index,
+                    '_type' => '_doc',
                     '_id' => $model->getKey(),
                 ],
             ];
@@ -103,17 +95,17 @@ class ElasticsearchEngine extends Engine
      */
     public function delete($models)
     {
-        $type = $models->first()->searchableAs();
+        $index = $models->first()->searchableAs();
 
         $params = ['body' => []];
 
         $i = 0;
 
-        $models->each(function ($model) use ($type, &$params, &$i) {
+        $models->each(function ($model) use ($index, &$params, &$i) {
             $params['body'][] = [
                 'delete' => [
-                    '_index' => $this->index,
-                    '_type' => $type,
+                    '_index' => $index,
+                    '_type' => '_doc',
                     '_id' => $model->getKey(),
                 ],
             ];
@@ -176,8 +168,8 @@ class ElasticsearchEngine extends Engine
     protected function performSearch(Builder $builder, array $options = [])
     {
         $params = [
-            'index' => $this->index,
-            'type' => $builder->index ?: $builder->model->searchableAs(),
+            'index' => $builder->index ?: $builder->model->searchableAs(),
+            'type' => '_doc',
             'body' => [
                 'query' => $this->buildRawQuery($builder, $options),
             ],
